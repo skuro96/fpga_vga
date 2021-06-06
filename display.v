@@ -28,8 +28,6 @@ parameter vert_max = vert_a + vert_b + vert_c + vert_d;
 parameter height = vert_c;
 
 
-
-
 /*
 	VGAは25MHzで駆動する. CLKは50MHzなので, 半周期のクロックを生成している.
 */
@@ -38,11 +36,13 @@ always @(posedge CLK) begin
 	VGA_CLK = ~VGA_CLK;
 end
 
+
 /*
 	縦×横=800*525を使う. 800は2進数では1100100000なので, 10桁必要となる.
 */
 reg[9:0] cnt_v = 10'b0; // 縦
 reg[9:0] cnt_h = 10'b0; // 横
+
 
 /*
 	水平・垂直走査信号をカウント
@@ -59,36 +59,41 @@ always@(negedge VGA_CLK) begin
 	end
 end
 
+
 /*
 	水平同期信号
 */
 always @(posedge VGA_CLK) begin
-	if(cnt_h == 16)
-		VGA_HS = 1'b0;
-	else if (cnt_h == 16 + 96)
+	if(cnt_h == 96)
 		VGA_HS = 1'b1;
+	else if (cnt_h == horz_max)
+		VGA_HS = 1'b0;
 end
+
 
 /*
 	垂直同期信号
 */
 always @(posedge VGA_CLK) begin
-	if(cnt_h == 16) begin
-		if(cnt_v == 10)
-			VGA_VS = 1'b0;      
-		else if(cnt_v == 10 + 2)
-			VGA_VS = 1'b1;
+	if(cnt_h == 96) begin
+		if(cnt_v == 2)
+			VGA_VS = 1'b1;      
+		else if(cnt_v == vert_max)
+			VGA_VS = 1'b0;
 	end
 end
 
 
+/*
+	色付け
+*/
 always @(posedge VGA_CLK) begin
-	if (cnt_h < 96 + 48 + 16 || cnt_v < 2 + 33 + 10) begin
+	if (cnt_h < 96 + 48 - 1 || cnt_v < 2 + 33 - 1) begin
 		VGA_R <= 4'b0000;
 		VGA_G <= 4'b1111;
 		VGA_B <= 4'b0000;
 	end
-	else begin
+	else if (cnt_h < horz_max - 16 && cnt_v < vert_max - 10) begin
 		VGA_R <= 4'b1111;
 		VGA_G <= 4'b0000;
 		VGA_B <= 4'b0000;
