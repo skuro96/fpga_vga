@@ -38,7 +38,7 @@ end
 
 reg[9:0] cnt_h = 10'b0; // 横
 reg[9:0] cnt_v = 10'b0; // 縦
-reg[18:0] tmp_cnt = 20'b0;
+reg[18:0] tmp_cnt = 1'b0;
 reg[9:0] cnt = 10'b0;
 
 
@@ -94,7 +94,7 @@ always @(posedge VGA_CLK) begin
 	end
 	else begin
 		// 斜めに直線を引く
-		if ((cnt_h - H_DISPLAY_START - cnt) == (cnt_v - V_DISPLAY_START) || (cnt_h - H_DISPLAY_START - cnt + H_DISPLAY) == (cnt_v - V_DISPLAY_START)) begin
+		if ((cnt_h - H_DISPLAY_START - cnt + H_DISPLAY) % H_DISPLAY == (cnt_v - V_DISPLAY_START)) begin
 			VGA_R <= 4'b1111;
 			VGA_G <= 4'b0000;
 			VGA_B <= 4'b0000;
